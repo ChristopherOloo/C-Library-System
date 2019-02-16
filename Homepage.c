@@ -20,18 +20,24 @@ FILE *fb=NULL,*fd=NULL,*fg=NULL;
 //list of function prototypes used in the system
 
 
-
+void Users(void);
+void User_home(void);
+void registration(void);
+void login(void);
 void home(void); 
 int getdata();  
 int Time(void);
 void returnfunc(void);
+void User_returnfunc(void);
 
 void Librarian_password(void);  
 void Librarian_home(void); 
 void addbooks(void);
 void searchbooks(void);
+void User_searchbooks(void);
 void editbooks(void);
 void viewbooks(void);
+void User_viewbooks(void);
 void issued_record();
 void issuebooks(void);
 void logout(void);
@@ -39,8 +45,8 @@ void deletebooks(void);
 void returnbooks(void);
 int checkbook_id(int);
   
-void User(void);
-void Registration(void);
+
+
 
 //The Global Variables
 int choice;
@@ -72,6 +78,14 @@ struct Book{
 
 struct Book sample;
 
+struct login
+{
+char firstname[12];
+char lastname[12];
+char username[25];
+char password[10];
+};
+
 int main(void) {
 	
 	home();
@@ -80,41 +94,176 @@ int main(void) {
 	return 0;
 }
 
-
-
-
-//function home for the home page to the user
-void home(void){
-  system("cls");
-	system("color 0A");
-    
-	printf("\t Login into the System as : (Choose One)\n\t" );
-	printf("\t 1:Librarian \n\t");
-	printf("\t 2:User \n\t");
-	printf("\t 3:No user account!Register\n\t");
-	printf("\t Enter your choice : ");
-	scanf("%d",&choice);
-	
-	switch(choice){
+//the system's home function
+void home(void)
+{
+	system("cls");
+	// system("color 0A"); //for windows
+	puts("\t############################## LIBRARY SYSTEM #################################");
+	puts("\n\t\t\t\tPlease select your Category\n"); //prompts user to enter his/her Category i.e User or Admin
+	puts("\t\t\t........................................................."); 
+	puts("\t\t\t\t--->1.LIbrarian \t\t --->2.Users");
+	puts("\n\t\t\t\t--->3.Exit");
+	puts("\t\t\t........................................................."); 
+	printf("\t\t\tSelect your choice:");
+	int n;
+	scanf("%d",&n);
+		switch(n)
+		{
+			case 1:
+				Librarian_password();
+				
+				break;
+				
+			case 2:
+				Users();
+				break;
+			case 3:
+				exit(0);
+				break;				
+			default:
+				system("cls");
+				printf("\t Invalid Choice! Try Again\n");
+				home();
+		}
+}
+//user home function
+void User_home(void)
+{
+		system("cls");
+		int n;
+		puts("\n\n***************User Section********************\n");
+		puts("\n*************************************************\n");
+		puts("Select a task to perform from the list below:");
+		puts("\t-->1.Search Books\n");
+		puts("\t-->2.View Books\n");
+		puts("\t-->3.Exit\n");
+		puts("*************************************************");
+		printf("\nEnter Your Choice:");
+		scanf("%d",&n);
+	switch (n)
+	{
 		case 1:
-			Librarian_password();
-			
+			User_searchbooks();  //call Search book functin
 			break;
-			
 		case 2:
-			
-			
+			User_viewbooks();     //call viewbooks function
 			break;
-		
 		case 3:
-			
-			break;
-			
+			exit(0); //call exit function to exit
+			break;	
 		default:
 			system("cls");
-			printf("\t Invalid Choice! Try Again\n");
-			home();
+			puts("INVALID CHOICE TRY AGAIN");
+			User_home();
+			break;
 	}
+}
+
+//function for login
+void login(void)
+{
+	system("cls");//reserve for windows
+	char username[25];
+    char password[10];
+    FILE *log;
+	char correct = 'n';
+    log=fopen("logins.dat","r+");//opening file for reading
+    printf("\nEnter your user name and password to login\n");
+    printf("\t\nUsername:");
+    scanf("%s",username);
+    printf("\t\nPassword:");
+    scanf("%s",password);
+    while(!feof(log) && correct == 'n')
+    {
+
+		struct login a;
+		int result = fread(&a, sizeof(struct login), 1, log);
+        if(result != 0 && strcmp(username,a.username) == 0 && strcmp(password,a.password) == 0)//compares if username and password matches those in login file
+        {
+
+            printf("Successful login!");
+            printf("\nWelcome! %s",username);
+			correct = 'y';
+            User_home();//User_home function
+        }
+    }
+    if(correct == 'n')
+        {
+            printf("Please Enter correct UserName and password");
+            login();
+        }
+    fclose(log);
+}
+
+
+// registration section
+void registration(void)
+{
+	FILE *log; 
+	log=fopen("logins.dat","ab+"); //open a login file for reading and updating
+	struct login a;
+
+	if (log == NULL) {
+		puts("ERROR! OPENING FILE!");
+	}
+	else
+	{
+		
+		puts("\n\tEnter your firstname:"); //append data into the login file
+		scanf("%s",a.firstname);
+		puts("\n\tEnter your lastname:");
+		scanf("%s",a.lastname);
+		puts("\n\tEnter your username:");
+		scanf("%s",a.username);
+		puts("\n\tEnter your password not exceeding 10 characters:");
+		scanf("%s",a.password);
+		fseek(log,0,SEEK_END); // moving the file to the end allow appending of the next file
+		fwrite(&a,sizeof(struct login),1,log);
+		printf("Your username is:%s\n",a.username);
+	
+	
+	delay(3000);
+	}
+	fclose(log);
+ 	login();    //call login function
+}
+
+// Users function
+void Users(void)
+{
+	system("cls");
+	puts("\t############################## LIBRARY SYSTEM #################################");
+  printf("\n\n\t\t\t-->Press 1. to REGISTER  \n\t\t\t-->Press 2. to LOGIN\n");
+	puts("\t\t\t-->Press 3. to Exit");
+    int num;
+	printf("\n\n\t\tPlease enter what you wish to do:");
+  scanf("%d",&num);
+	if (num==1)
+	{
+		system("cls");
+		printf("Welcome to registration page");
+		registration();//call registration function
+	}
+	else if (num==2)
+	{
+	system("cls");
+	printf("\nEnter your details below for verification");
+	login();//call login function
+	}
+	else if (num==3)
+	{
+		system("cls");
+		User_home();
+	}
+	else
+	{
+		system("cls");
+		puts("Invalid option");
+		Users();
+	}
+	
+ 
 }
 
 
@@ -377,16 +526,23 @@ void viewbooks(void)
         puts("\t\t\t**********************************************************************\n");
 
         printf("\t\t\t%6s %6s %6s %14s %23s\n", "BOOK ID","QUANTITY", "RACK No.","TITLE", "AUTHOR");
-      
+       
+			 int i=0;
         while(!feof(vb))
         {   
 	        int results=fread(&sample,sizeof(sample),1,vb);
             if (results!=0)
             {
                 printf("\t\t\t %6d %6d %6d \t%16s \t%16s\n",sample.book_id,sample.quantity,sample.rack_no,sample.Title,sample.Author);
+
+								i =i + sample.quantity;
             }
             
+						
+
         }
+				
+				printf("\n\t\t\t\t\t TOTAL=%d\n",i);
         puts("\n\t\t\t************************************************************************");
         puts("\t\t\t**************************************************************************");
         
@@ -395,80 +551,6 @@ void viewbooks(void)
     fclose(vb);
 		returnfunc();
 }
-
-
-
-
-// void viewbooks(void)
-// {
-	
-// 	system("cls");
-// 	system("color A7");
-// 	//int i=0;
-	
-// 	 // improve this part for viewing
-	
-//  if((fb = fopen("books.dat", "rb"))==NULL)
-// 	 {
-// 		puts("cannot open file");
-// 		/* code */
-// 	}
-// 	else
-// 	{	
-		
-
-// 		printf("\n\n\n\t\t\t     Books List         \n ");
-// 	  printf( "\t\t CATEGORY\tBOOK ID\t\tTITLE\tAUTHOR\tQUANTITY\tRACK NO \n");
-	  
-// 		while(fread(&sample,sizeof(sample),1,fb)==1){
-		   
-// 				printf( "\n\t\t 	%d	  %s	  %s	  %d	   %d\n", sample.book_id,sample.Title,sample.Author, sample.quantity,sample.rack_no);
-// 			fclose(fb);
-// 		}
-// 	}
-		
-
-// delay(3000);		
-// returnfunc();
-	
-//	}
-
-
-//	while(fread(&sample,sizeof(sample),1,fb)==1){
-	// if(fb == NULL)
-	// {
-	// 	puts("Error: Could not open the files");
-	// }
-	
-	
-// 	else{
-
-	
-
-// 		while(!feof(fb))
-// 	{
-// 		//struct Book book;
-		
-// 			while(fread(&sample, sizeof(sample), 1, fb)==1)
-// 			{
-// 				printf( "\n\t\t %s\t	%d\t\t	  %s\t	  %s	\t  %d	 \t    %d\n", sample.Category, sample.book_id, sample.Title,sample.Author, sample.quantity,sample.rack_no);
-// 			}
-// 		}
-	
-// }
-  
-	// i=i + sample.quantity;
-	// printf("\t\t\t\t\t Total Books = %d",i);
-	//fclose(fb); 
-
-		// improve this printf code make the view output nice
-		// Ensure there is output without the use address ... cooked!! 
-		
-//		
-//	}
-	
-//	
-
 
 //function for returning back Librarian_home
 void returnfunc(void){
@@ -481,26 +563,7 @@ void returnfunc(void){
 		  goto sample;
 }
 
-/*This function does not delete values effectively: Work on it : */
-/*Key bugs: Deleting as a group, Deleting a non-existing Value after immediate delete of existing value, The 1st output in View cannot be deleted maybe bcoz-- 
-use of address in view*/
-// function for deleting books from the record 
 
-
-// void viewbooks(void){
-// 	 system("cls");
-// 	 system("color A5");
-
-// 	 if((fb =fopen("books.dat", "rb"))==NULL){
-// 		 puts("Could not open the file");
-// 	 }
-
-// 	 else
-// 	 {
-// 		 printf("%-6")
-// 	 }
-	 
-// }
 
 void deletebooks(void){
 	system("cls");
@@ -619,19 +682,8 @@ void searchbooks(void){
 					findbook = 't';
 					returnfunc();
 				}
-				
-		
-				
-		    	/*	else
-				{
-				printf("\t\t No Record found\n");
-				printf("\v\t Retry?(Y/N)");
-				
-				    if(getch()=='y')
-				    searchbooks();
-				
-				    else
-				    Librarian_home();*/
+			
+		    
 			}
 			
 			// trying if the record entered is in the loop or not
@@ -758,9 +810,6 @@ void editbooks(){
 	returnfunc();
 }
 
-/* 8th Feb 2019: There is a problem with the program code. It is running as expectedi.e The View Function: Check on it . It just lost data abrubtly-- was
- good initially*/
- 
  // Information about the books issued
  void issued_record(void){
 	system("cls");
@@ -828,18 +877,21 @@ void issuebooks(void){
 					fclose(fg);
 					
 					
+					
 				}
 				else{
 					printf("\n\t\t No Record Found\n");
 					delay(3000);
 					issuebooks();
 				}
+
 				
 				printf("\n\t\t Issue More Book?(Y/N)");
 				fflush(stdin);
 				another = getch();
 				fclose(fb);
 			}
+
 			break;
 		}
 		
@@ -1006,4 +1058,153 @@ void issuebooks(void){
 	returnfunc();
 } 
 
-/*  Note: Addbooks, and Updatebooks are somehow ok:   Things to Work On:    1. View Function  2. Search Function.*/
+// user return function
+void User_returnfunc(void){
+	printf("\n\t Press ENTER to return to the Main Menu  ");
+	sample:
+		if(getch()==13)
+		User_home();
+		
+		else
+		  goto sample;
+}
+
+//user view book
+void User_viewbooks(void)
+{
+  system("clear");
+  FILE *vb=NULL;  
+  vb = fopen("books.dat", "rb+");
+	if (vb == NULL)
+	{
+		puts("Error opening the file");
+
+	}
+	else
+	{     
+		    system("cls");
+        puts("\t\t\t*********************** BOOK LIST **************************************");
+        puts("\n\n\t\t\t**********************************************************************");
+        puts("\t\t\t**********************************************************************\n");
+
+        printf("\t\t\t%6s %6s %6s %14s %23s\n", "BOOK ID","QUANTITY", "RACK No.","TITLE", "AUTHOR");
+       
+			 int i=0;
+        while(!feof(vb))
+        {   
+	        int results=fread(&sample,sizeof(sample),1,vb);
+            if (results!=0)
+            {
+                printf("\t\t\t %6d %6d %6d \t%16s \t%16s\n",sample.book_id,sample.quantity,sample.rack_no,sample.Title,sample.Author);
+
+								i =i + sample.quantity;
+            }
+            
+						
+
+        }
+				
+				printf("\n\t\t\t\t\t TOTAL=%d\n",i);
+        puts("\n\t\t\t************************************************************************");
+        puts("\t\t\t**************************************************************************");
+        
+    }
+   
+    fclose(vb);
+		User_returnfunc();
+}
+
+//user Search book
+void User_searchbooks(void){
+	system("cls");
+	system("color 3F");
+	
+	int d;
+	printf("\t\t Search Books\n");
+	printf("\t\t\t 1:By Book Id\n");
+	printf("\t\t\t 2:By Title\n");
+	printf("\t\t\t Enter Your Choice: ");
+	scanf("%d",&d);
+	fb = fopen("books.dat", "rb+");
+	rewind(fb);
+	
+	switch(d){
+		case 1:{
+			system("cls");
+			
+			printf("\t\t Search Books by Id\n");
+			printf("\t\t Enter Book Id: ");
+			scanf("%d",&d);
+			
+			while(fread(&sample,sizeof(sample),1,fb)==1){
+				if(sample.book_id==d){
+					system("cls");
+					printf("\t\t Book Available\n");
+					//printf("\t\t Category %s\n", sample.Category);
+					printf("\t\t Title: %s\n", sample.Title);
+					printf("\t\t ID : %d\n", sample.book_id);
+					printf("\t\t Quantity :%d\n",sample.quantity);
+					printf("\t\t Rack No. :%d", sample.rack_no);
+					
+					findbook = 't';
+					User_returnfunc();
+				}
+			
+		    
+			}
+			
+			// trying if the record entered is in the loop or not
+			if(findbook != 't'){
+				printf("\t\t No Record found\n");
+				printf("\t\t Retry?(Y/N)");
+				
+				if(getch()=='y')
+				User_searchbooks();
+				
+				else
+				User_home();
+			}
+			break;
+		}
+		
+		case 2:{
+			system("cls");
+			char s[15];
+			
+			printf("\t\t Search Book by Title\n");
+			printf("\t\t Enter Book Title: ");
+			scanf("%s",s);
+			
+			int d=0;
+			while(fread(&sample,sizeof(sample),1,fb)==1){
+				if(strcmp(sample.Title,(s))==0){ // whether name entered as s is == book's name or not
+					printf("\t\t Book Available\n");
+				//	printf("\t\t Category :%s\n",sample.Category);
+					printf("\t\t Title: %s\n",sample.Title);
+					printf("\t\t ID : %d\n", sample.book_id);
+					printf("\t\t Author : %s\n", sample.Author);
+					printf("\t\t Quantity :%d\n", sample.quantity);
+					printf("\t\t Rack No. :%d",sample.rack_no);
+					d++;  // why increament inside if??
+					User_returnfunc();
+				}
+			}
+			
+			if(d==0){
+				printf("\t\t No Book Record\n");
+				printf("\t\t Retry?(Y/N)");
+				if(getch()== 'y')
+				User_searchbooks();
+				else
+				User_home();
+			}
+			break;
+		}
+		
+		default:
+		getch();
+		User_searchbooks();	
+	}
+	
+	fclose(fb);
+}
