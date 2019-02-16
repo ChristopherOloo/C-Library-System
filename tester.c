@@ -3,8 +3,8 @@
 void add(void);
 void viewBook(void);
 
-// glabal pointer
-FILE *bookPtr;
+	return 0;
+}
 
 // global structs
 typedef struct
